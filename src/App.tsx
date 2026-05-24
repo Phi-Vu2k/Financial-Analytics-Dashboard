@@ -1,121 +1,125 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useEffect, useMemo, useState } from 'react'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { CssBaseline, ThemeProvider, createTheme } from '@mui/material'
+import AdminLayout from './components/layout/AdminLayout'
+import DashboardPage from './pages/DashboardPage'
+import NotificationsPage from './pages/NotificationsPage'
+import TableListPage from './pages/TableListPage'
+import UpgradePage from './pages/UpgradePage'
+import UserProfilePage from './pages/UserProfilePage'
+import type { ColorMode } from './components/layout/ThemeToggle'
+
+const colorModeStorageKey = 'financial-dashboard-color-mode'
+
+const paletteTokens = {
+  light: {
+    background: '#f4f7fb',
+    surface: '#ffffff',
+    surfaceMuted: '#eef3f9',
+    border: '#d9e2ef',
+    textPrimary: '#0f172a',
+    textSecondary: '#475569',
+    primary: '#1d4ed8',
+    primarySoft: '#dbeafe',
+    primaryContrast: '#ffffff',
+  },
+  dark: {
+    background: '#0b1220',
+    surface: '#111827',
+    surfaceMuted: '#162031',
+    border: '#243244',
+    textPrimary: '#e5eefb',
+    textSecondary: '#b2c0d6',
+    primary: '#7aa2ff',
+    primarySoft: 'rgba(122, 162, 255, 0.16)',
+    primaryContrast: '#08111f',
+  },
+} as const
+
+function getInitialColorMode(): ColorMode {
+  if (typeof window === 'undefined') {
+    return 'light'
+  }
+
+  const storedMode = window.localStorage.getItem(colorModeStorageKey)
+  if (storedMode === 'light' || storedMode === 'dark') {
+    return storedMode
+  }
+
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+}
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [colorMode, setColorMode] = useState<ColorMode>(getInitialColorMode)
+
+  useEffect(() => {
+    window.localStorage.setItem(colorModeStorageKey, colorMode)
+    document.documentElement.dataset.theme = colorMode
+  }, [colorMode])
+
+  const theme = useMemo(() => {
+    const tokens = paletteTokens[colorMode]
+
+    return createTheme({
+      palette: {
+        mode: colorMode,
+        primary: {
+          main: tokens.primary,
+          contrastText: tokens.primaryContrast,
+        },
+        secondary: {
+          main: colorMode === 'light' ? '#0f766e' : '#2dd4bf',
+        },
+        background: {
+          default: tokens.background,
+          paper: tokens.surface,
+        },
+        text: {
+          primary: tokens.textPrimary,
+          secondary: tokens.textSecondary,
+        },
+        divider: tokens.border,
+      },
+      shape: {
+        borderRadius: 16,
+      },
+      typography: {
+        fontFamily:
+          'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      },
+    })
+  }, [colorMode])
+
+  const handleToggleColorMode = () => {
+    setColorMode((currentMode) => (currentMode === 'light' ? 'dark' : 'light'))
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Navigate replace to="/admin/dashboard" />} />
+          <Route
+            path="/admin"
+            element={
+              <AdminLayout
+                colorMode={colorMode}
+                onToggleColorMode={handleToggleColorMode}
+              />
+            }
+          >
+            <Route index element={<Navigate replace to="dashboard" />} />
+            <Route path="dashboard" element={<DashboardPage />} />
+            <Route path="user-profile" element={<UserProfilePage />} />
+            <Route path="table-list" element={<TableListPage />} />
+            <Route path="notifications" element={<NotificationsPage />} />
+            <Route path="upgrade" element={<UpgradePage />} />
+          </Route>
+          <Route path="*" element={<Navigate replace to="/admin/dashboard" />} />
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   )
 }
 
